@@ -1,0 +1,40 @@
+# VibeToken Small-Large Configuration
+# Small encoder + Large decoder for faster encoding
+#
+# Usage:
+#   from vibetoken import VibeTokenTokenizer
+#   tokenizer = VibeTokenTokenizer.from_config(
+#       "configs/vibetoken_sl.yaml",
+#       "path/to/checkpoint.bin"
+#   )
+
+model:
+  sub_model_type: "ablations_v4"
+  vq_model:
+    # Quantization settings
+    quantize_mode: mvq
+    codebook_size: 32768  # 32768 / 8 = 4096 per codebook
+    token_size: 256       # 256 / 8 = 32 per codebook
+    num_codebooks: 8
+    use_l2_norm: false
+    commitment_cost: 0.25
+    
+    # Encoder architecture (Small for faster encoding)
+    vit_enc_model_size: "small"
+    vit_enc_patch_size: 32
+    
+    # Decoder architecture (Large for quality)
+    vit_dec_model_size: "large"
+    vit_dec_patch_size: 32
+    
+    # Latent tokens
+    num_latent_tokens: 256
+    
+    # Mode flags
+    is_legacy: false
+    finetune_decoder: false
+
+# Dataset preprocessing defaults (for reference)
+dataset:
+  preprocessing:
+    crop_size: 512
