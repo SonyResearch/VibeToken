@@ -1,0 +1,2 @@
+aws s3 cp s3://maitreyap/summer25/VibeToken_ckpts/tokenizer_ckpts/MVQ_LL_590k/ckpt-590k/ema_model/pytorch_model.bin /mnt/localssd/vibetoken/MVQ_LL_590k.bin
+aws s3 cp s3://maitreyap/summer25/VibeToken_ckpts/generator_ckpts/main_chkpts/main_xxls/gpt-xxl-dynamic-65_750k.pt /mnt/localssd/vibetoken/gpt-xxl-dynamic-65_750k.pt

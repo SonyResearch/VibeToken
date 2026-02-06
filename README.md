@@ -20,6 +20,8 @@ We introduce an efficient, resolution-agnostic autoregressive (AR) image synthes
 
 ### VibeToken Reconstruction Checkpoints
 
+Note: these links are random and not valid
+
 | Name                   | Resolution | rFID (256 tokens) | rFID (64 tokens) | Download Link                                           |
 |------------------------|:---------------------:|:-----------------:|:----------------:|---------------------------------------------------------|
 | VibeToken-LL      | 1024x1024                 | 3.76              | 4.53             | [hf.co/VibeToken/L-32x32](https://huggingface.co/VibeToken/L-32x32) |
@@ -37,6 +39,17 @@ We introduce an efficient, resolution-agnostic autoregressive (AR) image synthes
 | VibeToken-Gen-XXL       | 256x256               | 64            | 4.80      | [hf.co/VibeToken/Gen-XXL](https://huggingface.co/VibeToken/Gen-XXL)  |
 | VibeToken-Gen-XXL       | 1024x1024             | 64            | 3.50      | [hf.co/VibeToken/Gen-XXL](https://huggingface.co/VibeToken/Gen-XXL) (same as above) |
 
+
+## Setup
+
+```bash
+uv venv --python=3.11.6
+source .venv/bin/activate
+uv pip install -r requirements.txt
+
+# to download two key checkpoints VibeToken-LL and VibeToken-Gen XXL/65
+bash setup.sh
+```
 
 
 ## VibeToken Reconstruction
@@ -63,5 +76,32 @@ Note: We require the input image resolution to be the factor of 32 for the best 
 
 ## VibeToken-Gen ImageNet1k Generations
 
+
+```bash
+python generate.py \
+    --gpt-ckpt /mnt/localssd/vibetoken/gpt-xxl-dynamic-65_750k.pt \
+    --gpt-model GPT-XXL --num-output-layer 4 \
+    --num-codebooks 8 --codebook-size 32768 \
+    --image-size 256 --cfg-scale 4.0 --top-k 500 --temperature 1.0 \
+    --class-dropout-prob 0.1 \
+    --extra-layers "QKV" \
+    --latent-size 65 \
+    --config ./configs/vibetoken_ll.yaml \
+    --vq-ckpt /mnt/localssd/vibetoken/MVQ_LL_590k.bin \
+    --sample-dir ./assets/ \
+    --skip-folder-creation \
+    --compile \
+    --decoder-patch-size 32,32 \
+    --target-resolution 1024,1024 \ # this is for tokenizer
+    --llamagen-target-resolution 256,256 \ # this is for the generator (maximum is 512,512 for higher resolution handle this via tokenizer)
+    --precision bf16 \
+    --skip-folder-creation \
+    --global-seed 156464151
+```
+
+
+## Acknowledgement
+
+We would like to acknowledge the following repository which inspired our works and directly builds upon their source code: 1d-tokenizer, LLamaGen, and UniTok.
 
 ## Citation
