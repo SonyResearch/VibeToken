@@ -110,6 +110,9 @@ python generate.py \
     --global-seed 156464151
 ```
 
+## Train
+
+To train the model, please refer to the [TRAIN.md](TRAIN.md) script for detailed instructions.
 
 ## Acknowledgement
 
