@@ -20,24 +20,33 @@ We introduce an efficient, resolution-agnostic autoregressive (AR) image synthes
 
 ### VibeToken Reconstruction Checkpoints
 
-Note: these links are random and not valid
+All checkpoints are avaiable on S3. Please refer to the following S3 access keys.
+
+```bash
+pip install awscli
+
+export AWS_ACCESS_KEY_ID=AKIATXRXFEIWPN2VLGUE
+export AWS_SECRET_ACCESS_KEY=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
+
+aws s3 cp <s3-path> <output-path>
+```
 
 | Name                   | Resolution | rFID (256 tokens) | rFID (64 tokens) | Download Link                                           |
 |------------------------|:---------------------:|:-----------------:|:----------------:|---------------------------------------------------------|
-| VibeToken-LL      | 1024x1024                 | 3.76              | 4.53             | [hf.co/VibeToken/L-32x32](https://huggingface.co/VibeToken/L-32x32) |
-| VibeToken-LL      | 256x256                   | 5.12              | 5.96             | [hf.co/VibeToken/L-32x32](https://huggingface.co/VibeToken/L-32x32) (same as above) |
-| VibeToken-SL      | 1024x1024                 | 4.25              | 4.97             | [hf.co/VibeToken/L-32x32](https://huggingface.co/VibeToken/L-32x32) |
-| VibeToken-SL      | 256x256                   | 5.44              | 6.23             | [hf.co/VibeToken/L-32x32](https://huggingface.co/VibeToken/L-32x32) (same as above) |
+| VibeToken-LL      | 1024x1024                 | 3.76              | 4.12             | s3://vibetoken/checkpoints/VibeToken_LL.bin |
+| VibeToken-LL      | 256x256                   | 5.12              | 0.90             | s3://vibetoken/checkpoints/VibeToken_LL.bin (same as above) |
+| VibeToken-SL      | 1024x1024                 | 4.25              | 2.41             | s3://vibetoken/checkpoints/VibeToken_SL.bin |
+| VibeToken-SL      | 256x256                   | 5.44              | 0.40             | s3://vibetoken/checkpoints/VibeToken_SL.bin (same as above) |
 
 
 ### VibeToken-Gen Generation Checkpoints
 
 | Name                        | Training Resolution(s) | Tokens    | Best gFID | Download Link                                           |
 |-----------------------------|:---------------------:|:-------------:|:---------:|---------------------------------------------------------|
-| VibeToken-Gen-B         | 256x256               | 64            | 5.26      | [hf.co/VibeToken/Gen-B](https://huggingface.co/VibeToken/Gen-B)      |
-| VibeToken-Gen-B         | 1024x1024             | 64            | 3.94      | [hf.co/VibeToken/Gen-B](https://huggingface.co/VibeToken/Gen-B)   (same as above)   |
-| VibeToken-Gen-XXL       | 256x256               | 64            | 4.80      | [hf.co/VibeToken/Gen-XXL](https://huggingface.co/VibeToken/Gen-XXL)  |
-| VibeToken-Gen-XXL       | 1024x1024             | 64            | 3.50      | [hf.co/VibeToken/Gen-XXL](https://huggingface.co/VibeToken/Gen-XXL) (same as above) |
+| VibeToken-Gen-B         | 256x256               | 65            | 7.62      | s3://vibetoken/checkpoints/VibeTokenGen-b-fixed65_dynamic_1500k.pt      |
+| VibeToken-Gen-B         | 1024x1024             | 65            | 7.37      | s3://vibetoken/checkpoints/VibeTokenGen-b-fixed65_dynamic_1500k.pt   (same as above)   |
+| VibeToken-Gen-XXL       | 256x256               | 65            | 3.62      | s3://vibetoken/checkpoints/VibeTokenGen-xxl-dynamic-65_750k.pt  |
+| VibeToken-Gen-XXL       | 1024x1024             | 65            | 3.54      | s3://vibetoken/checkpoints/VibeTokenGen-xxl-dynamic-65_750k.pt (same as above) |
 
 
 ## Setup
@@ -45,14 +54,13 @@ Note: these links are random and not valid
 ```bash
 uv venv --python=3.11.6
 source .venv/bin/activate
-uv pip install -r requirements.txt
-
-# to download two key checkpoints VibeToken-LL and VibeToken-Gen XXL/65
-bash setup.sh
+uv pip install -r requirements.txt # this is not maintained
 ```
 
 
 ## VibeToken Reconstruction
+
+- Download the VibeToken-LL
 
 ```python
 # select auto for our suggested adaptation to arbitrary resolution
@@ -75,6 +83,9 @@ python reconstruct.py     \
 Note: We require the input image resolution to be the factor of 32 for the best performance. Hence, for any other rnadom resolutions, we reslace the image to nearest multiple of 32.
 
 ## VibeToken-Gen ImageNet1k Generations
+
+- Download the VibeToken-LL
+- Download the VibeToken-Gen-XXL
 
 
 ```bash
