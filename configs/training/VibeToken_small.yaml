@@ -1,0 +1,102 @@
+experiment:
+    project: "VibeToken_mvq_tiny_main"
+    name: "VibeToken_mvq_tiny_main"
+    output_dir: "wandb/VibeToken_mvq_tiny_main"
+    max_train_examples: 1_281_167
+    save_every: 10_000
+    eval_every: 10_000
+    generate_every: 5_000
+    log_every: 50
+    log_grad_norm_every: 1_000
+    resume: True
+
+model:
+    sub_model_type: "vibetoken"
+    train_with_attention: True
+    eval_with_attention: True
+    vq_model:
+        # encoder: # patch mixture is not supported
+        #     patch_mixture_start_layer: 2
+        #     patch_mixture_end_layer: 22
+        # decoder: # patch mixture is not supported
+        #     patch_mixture_start_layer: 2
+        #     patch_mixture_end_layer: 22
+        quantize_mode: mvq
+        codebook_size: 32768 # 32768 / 8 = 4096
+        token_size: 256 # 256 / 8 = 32
+        use_l2_norm: False
+        commitment_cost: 0.25
+        clustering_vq: False
+        num_codebooks: 8
+        # vit arch
+        vit_enc_model_size: "small"
+        vit_dec_model_size: "small"
+        vit_enc_patch_size: 32
+        vit_dec_patch_size: 32
+        num_latent_tokens: 64
+        finetune_decoder: False
+        is_legacy: False
+
+losses:
+    discriminator_start: 100_000
+    quantizer_weight: 1.0
+    discriminator_factor: 1.0
+    discriminator_weight: 0.1
+    perceptual_loss: "lpips-convnext_s-1.0-0.1"
+    perceptual_weight: 1.1
+    reconstruction_loss: "l2"
+    reconstruction_weight: 1.0
+    lecam_regularization_weight: 0.001
+
+dataset:
+    params:
+        pretokenization: True
+        train_shards_path_or_url: "/mnt/localssd/datasets/imagenet_wds/imagenet-train-{000001..000128}.tar"
+        eval_shards_path_or_url: "/mnt/localssd/datasets/imagenet_wds/imagenet-val-{000001..000004}.tar"
+        num_workers_per_gpu: 12
+    preprocessing:
+        resize_shorter_edge: 512
+        crop_size: 512
+        random_crop: True
+        random_flip: True
+        res_ratio_filtering: True
+        min_tokens: 32
+        max_tokens: 64
+
+optimizer:
+    name: adamw 
+    params:
+        learning_rate: 1e-4
+        discriminator_learning_rate: 1e-4
+        beta1: 0.9
+        beta2: 0.999
+        weight_decay: 1e-4
+
+lr_scheduler:
+    scheduler: "cosine"
+    params:
+        learning_rate: ${optimizer.params.learning_rate}
+        warmup_steps: 10_000
+        end_lr: 1e-5
+
+training:
+    gradient_accumulation_steps: 1
+    per_gpu_batch_size: 32
+    mixed_precision: "fp16"
+    enable_tf32: True
+    enable_wandb: True
+    use_ema: True
+    seed: 42
+    max_train_steps: 400_000
+    num_generated_images: 2
+    max_grad_norm: 1.0
+    variable_resolution:
+        any2any: True
+        dim:
+          - [256, 256]
+          - [512, 512]
+          - [384, 256]
+          - [256, 384]
+          - [512, 384]
+          - [384, 512]
+        ratio: [0.3, 0.3, 0.1, 0.1, 0.1, 0.1]

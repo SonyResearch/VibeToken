@@ -9,7 +9,7 @@
 #   )
 
 model:
-  sub_model_type: "ablations_v4"
+  sub_model_type: "vibetoken"
   vq_model:
     # Quantization settings
     quantize_mode: mvq
