@@ -16,11 +16,12 @@ from torch.utils.data import DataLoader
 from omegaconf import OmegaConf
 from torch.optim import AdamW
 from utils.lr_schedulers import get_scheduler
-from modeling.modules import EMAModel, ReconstructionLoss_Single_Stage
+from modeling.modules import EMAModel, ReconstructionLoss_Single_Stage, ReconstructionLoss_AE
 from modeling.vibetoken_model import VibeTokenModel, PretrainedTokenizer
+from modeling.vibetoken_ae_model import VibeTokenAEModel
 from evaluator import VQGANEvaluator
 
-from utils.viz_utils import make_viz_from_samples
+from utils.viz_utils import make_viz_from_samples, make_viz_from_refinement_steps
 from torchinfo import summary
 import accelerate
 
@@ -75,6 +76,9 @@ def create_model_and_loss_module(config, logger, accelerator,
         if config.model.sub_model_type == "vibetoken":
             model_cls = VibeTokenModel
             loss_cls = ReconstructionLoss_Single_Stage
+        elif config.model.sub_model_type == "vibetoken_ae":
+            model_cls = VibeTokenAEModel
+            loss_cls = ReconstructionLoss_AE
         else:
             raise ValueError(f"Unsupported sub_model_type {config.model.sub_model_type}")
     else:
@@ -324,7 +328,8 @@ def create_evaluator(config, logger, accelerator):
     """Creates evaluator."""
     logger.info("Creating evaluator.")
     
-    if config.model.vq_model.get("quantize_mode", "vq") in ["vq", "softvq", "mvq"]:
+    quantize_mode = config.model.vq_model.get("quantize_mode", "vq")
+    if quantize_mode in ["vq", "softvq", "mvq"]:
         evaluator = LazyVQGANEvaluator(
             device=accelerator.device,
             enable_rfid=True,
@@ -334,7 +339,7 @@ def create_evaluator(config, logger, accelerator):
             num_codebook_entries=config.model.vq_model.codebook_size,
             accelerator=accelerator
         )
-    elif config.model.vq_model.get("quantize_mode", "vq") == "vae":
+    elif quantize_mode in ["vae", "ae"]:
         evaluator = LazyVQGANEvaluator(
             device=accelerator.device,
             enable_rfid=True,
@@ -631,6 +636,13 @@ def train_one_epoch(config, logger, accelerator,
                         pretrained_tokenizer=pretrained_tokenizer
                     )
 
+                    if config.model.sub_model_type == "vibetoken_ae":
+                        generate_ae_images(
+                            model, accelerator, global_step + 1,
+                            config.experiment.output_dir, logger, config,
+                            num_images=config.training.num_generated_images,
+                        )
+
                     if config.training.get("use_ema", False):
                         ema_model.restore(model.parameters())
                 
@@ -729,7 +741,7 @@ def eval_reconstruction(
         original_images = torch.clamp(original_images, 0.0, 1.0)
         
         if isinstance(model_dict, dict): 
-            evaluator.update(original_images, reconstructed_images.squeeze(2), model_dict["min_encoding_indices"])
+            evaluator.update(original_images, reconstructed_images.squeeze(2), model_dict.get("min_encoding_indices", None))
         else:
             evaluator.update(original_images, reconstructed_images.squeeze(2), None)
     
@@ -794,6 +806,58 @@ def reconstruct_images(model, original_images, fnames, accelerator,
         filename = f"{global_step:08}_s-{i:03}-{fnames[i]}.png"
         path = os.path.join(root, filename)
         img.save(path)
+
+    model.train()
+
+
+@torch.no_grad()
+def generate_ae_images(model, accelerator, global_step, output_dir, logger,
+                       config, num_images=4):
+    """Generate one-shot and iterative-refinement images for VibeTokenAE."""
+    logger.info("Generating AE images (one-shot + refinement)...")
+    local_model = accelerator.unwrap_model(model)
+    local_model.eval()
+
+    height = config.dataset.preprocessing.crop_size
+    width = config.dataset.preprocessing.crop_size
+
+    dtype = torch.float32
+    if accelerator.mixed_precision == "fp16":
+        dtype = torch.float16
+    elif accelerator.mixed_precision == "bf16":
+        dtype = torch.bfloat16
+
+    root_oneshot = Path(output_dir) / "gen_oneshot"
+    root_refine = Path(output_dir) / "gen_refinement"
+    os.makedirs(root_oneshot, exist_ok=True)
+    os.makedirs(root_refine, exist_ok=True)
+
+    with torch.autocast("cuda", dtype=dtype, enabled=accelerator.mixed_precision != "no"):
+        # One-shot generation
+        oneshot_steps = local_model.generate(
+            num_images, height, width, num_steps=1)
+        # Iterative refinement (4 steps)
+        refine_steps = local_model.generate(
+            num_images, height, width, num_steps=4, refine_noise_deg=5.0)
+
+    # Save one-shot grid
+    oneshot_img, oneshot_log = make_viz_from_refinement_steps(oneshot_steps)
+    oneshot_img.save(root_oneshot / f"{global_step:08d}_oneshot.png")
+
+    # Save refinement grid
+    refine_img, refine_log = make_viz_from_refinement_steps(refine_steps)
+    refine_img.save(root_refine / f"{global_step:08d}_refinement.png")
+
+    if config.training.enable_wandb:
+        accelerator.get_tracker("wandb").log_images(
+            {"AE One-Shot Generation": [oneshot_img]}, step=global_step)
+        accelerator.get_tracker("wandb").log_images(
+            {"AE Refinement Generation": [refine_img]}, step=global_step)
+    else:
+        accelerator.get_tracker("tensorboard").log_images(
+            {"AE One-Shot Generation": oneshot_log[None]}, step=global_step)
+        accelerator.get_tracker("tensorboard").log_images(
+            {"AE Refinement Generation": refine_log[None]}, step=global_step)
 
     model.train()
 

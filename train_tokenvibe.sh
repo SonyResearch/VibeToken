@@ -10,5 +10,5 @@ accelerate launch \
     --main_process_ip=$MASTER_ADDR \
     --main_process_port=$MASTER_PORT \
     --same_network \
-    scripts/train_tokenvibe.py \
-    config=configs/training/VibeToken_small.yaml
+    scripts/train_vibetoken.py \
+    config=configs/training/VibeToken_AE_small.yaml

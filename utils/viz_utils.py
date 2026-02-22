@@ -53,6 +53,32 @@ def make_viz_from_samples_generation(
     return images_for_saving, images_for_logging
 
 
+def make_viz_from_refinement_steps(step_images):
+    """Create a grid visualization of iterative refinement steps.
+
+    Each row is one sample, columns are refinement steps [step_0 | step_1 | ... | step_T-1].
+
+    Args:
+        step_images: List of T tensors, each (B, 3, H, W) in [0, 1].
+
+    Returns:
+        (images_for_saving, images_for_logging) matching the existing pattern.
+        images_for_saving is a single PIL image with the full grid.
+        images_for_logging is the tensor (C, grid_H, grid_W).
+    """
+    T = len(step_images)
+    B = step_images[0].shape[0]
+
+    # stack to (T, B, C, H, W), then rearrange to grid: rows=samples, cols=steps
+    grid = torch.stack([img.clamp(0, 1).cpu() for img in step_images])  # (T, B, C, H, W)
+    grid = (grid * 255.0).byte()
+    # rows = B samples, cols = T steps
+    images_for_logging = rearrange(grid, 't b c h w -> c (b h) (t w)')
+    images_for_saving = F.to_pil_image(images_for_logging)
+
+    return images_for_saving, images_for_logging
+
+
 def make_viz_from_samples_t2i_generation(
     generated_images,
     captions,
