@@ -3,7 +3,7 @@
 
 """Example run:
 python generate.py \
-    --gpt-ckpt /mnt/localssd/vibetoken/gpt-xxl-dynamic-65_750k.pt \
+    --gpt-ckpt ./checkpoints/VibeTokenGen-xxl-dynamic-65_750k.pt \
     --gpt-model GPT-XXL --num-output-layer 4 \
     --num-codebooks 8 --codebook-size 32768 \
     --image-size 256 --cfg-scale 2.0 --top-k 0 --temperature 1.0 \
@@ -11,15 +11,14 @@ python generate.py \
     --extra-layers "QKV" \
     --latent-size 65 \
     --config ./configs/vibetoken_ll.yaml \
-    --vq-ckpt /mnt/localssd/vibetoken/MVQ_LL_590k.bin \
+    --vq-ckpt ./checkpoints/VibeToken_LL.bin \
     --sample-dir ./assets/ \
     --skip-folder-creation \
     --compile \
-    --decoder-patch-size 16,16
-    --target-resolution 1024,1024 # this is for tokenizer
-    --llamagen-target-resolution 256,256 # this is for the generator (maximum is 512,512 for higher resolution handle this via tokenizer)
-    --precision bf16 \
-    --skip-folder-creation
+    --decoder-patch-size 16,16 \
+    --target-resolution 1024,1024 \
+    --llamagen-target-resolution 256,256 \
+    --precision bf16
 """
 
 import torch

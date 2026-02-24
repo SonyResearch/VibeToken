@@ -51,8 +51,8 @@ losses:
 dataset:
     params:
         pretokenization: True
-        train_shards_path_or_url: "/mnt/localssd/datasets/imagenet_wds/imagenet-train-{000001..000128}.tar"
-        eval_shards_path_or_url: "/mnt/localssd/datasets/imagenet_wds/imagenet-val-{000001..000004}.tar"
+        train_shards_path_or_url: "./data/imagenet_wds/imagenet-train-{000001..000128}.tar"
+        eval_shards_path_or_url: "./data/imagenet_wds/imagenet-val-{000001..000004}.tar"
         num_workers_per_gpu: 12
     preprocessing:
         resize_shorter_edge: 512

@@ -9,13 +9,13 @@ import webdataset as wds
 from datasets import load_dataset
 
 
-def convert_imagenet_to_wds(output_dir, max_train_samples_per_shard, max_val_samples_per_shard):
+def convert_imagenet_to_wds(input_dir, output_dir, max_train_samples_per_shard, max_val_samples_per_shard):
     assert not os.path.exists(os.path.join(output_dir, "imagenet-train-000000.tar"))
     assert not os.path.exists(os.path.join(output_dir, "imagenet-val-000000.tar"))
 
     opat = os.path.join(output_dir, "imagenet-train-%06d.tar")
     output = wds.ShardWriter(opat, maxcount=max_train_samples_per_shard)
-    dataset = load_dataset("/mnt/localssd/datasets/imagenet-1k", split="train")
+    dataset = load_dataset(input_dir, split="train")
     now = time.time()
     for i, example in enumerate(dataset):
         if i % max_train_samples_per_shard == 0:
@@ -28,7 +28,7 @@ def convert_imagenet_to_wds(output_dir, max_train_samples_per_shard, max_val_sam
 
     opat = os.path.join(output_dir, "imagenet-val-%06d.tar")
     output = wds.ShardWriter(opat, maxcount=max_val_samples_per_shard)
-    dataset = load_dataset("/mnt/localssd/datasets/imagenet-1k", split="validation")
+    dataset = load_dataset(input_dir, split="validation")
     now = time.time()
     for i, example in enumerate(dataset):
         if i % max_val_samples_per_shard == 0:
@@ -41,13 +41,16 @@ def convert_imagenet_to_wds(output_dir, max_train_samples_per_shard, max_val_sam
 
 
 if __name__ == "__main__":
-    # create parase object
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_dir", type=str, required=True, help="Path to the output directory.")
-    parser.add_argument("--max_train_samples_per_shard", type=int, default=10000, help="Path to the output directory.")
-    parser.add_argument("--max_val_samples_per_shard", type=int, default=10000, help="Path to the output directory.")
+    parser.add_argument("--input_dir", type=str, required=True,
+                        help="Path to the ImageNet-1k dataset (HuggingFace format).")
+    parser.add_argument("--output_dir", type=str, required=True,
+                        help="Path to the output directory for WebDataset shards.")
+    parser.add_argument("--max_train_samples_per_shard", type=int, default=10000,
+                        help="Maximum number of training samples per shard.")
+    parser.add_argument("--max_val_samples_per_shard", type=int, default=10000,
+                        help="Maximum number of validation samples per shard.")
     args = parser.parse_args()
 
-    # create output directory
     os.makedirs(args.output_dir, exist_ok=True)
-    convert_imagenet_to_wds(args.output_dir, args.max_train_samples_per_shard, args.max_val_samples_per_shard)
+    convert_imagenet_to_wds(args.input_dir, args.output_dir, args.max_train_samples_per_shard, args.max_val_samples_per_shard)

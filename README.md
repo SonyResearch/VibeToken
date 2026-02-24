@@ -4,23 +4,69 @@
   <img src="assets/teaser.png" alt="VibeToken Teaser" width="100%">
 </p>
 
+<p align="center">
+  <b>CVPR 2026</b> &nbsp;|&nbsp;
+  <a href="#">Paper</a> &nbsp;|&nbsp;
+  <a href="#">Project Page</a> &nbsp;|&nbsp;
+  <a href="#-checkpoints">Checkpoints</a>
+</p>
 
-We introduce an efficient, resolution-agnostic autoregressive (AR) image synthesis approach that generalizes to arbitrary resolutions and aspect ratios, narrowing the gap to diffusion models at scale. At its core is VibeToken, a novel resolution-agnostic 1D Transformer-based image tokenizer that encodes images into a dynamic, user-controllable sequence of 32–256 tokens, achieving a state-of-the-art efficiency and performance trade-off. Building on VibeToken, we present VibeToken-Gen, a class-conditioned AR generator with out-of-the-box support for arbitrary resolutions while requiring significantly fewer compute resources. Notably, VibeToken-Gen synthesizes 1024x1024 images using only 64 tokens and achieves 3.94 gFID; by comparison, a diffusion-based state-of-the-art alternative requires 1,024 tokens and attains 5.87 gFID. In contrast to fixed-resolution AR models such as LlamaGen—whose inference FLOPs grow quadratically with resolution (11T FLOPs at 1024x1024)—VibeToken-Gen maintains a constant 179G FLOPs (63.4 efficient) independent of resolution. We hope VibeToken can help unlock the wide adoption of AR visual generative models in production use cases.
+<p align="center">
+  <img src="https://img.shields.io/badge/CVPR-2026-blue" alt="CVPR 2026">
+  <img src="https://img.shields.io/badge/arXiv-TODO-b31b1b" alt="arXiv">
+  <img src="https://img.shields.io/badge/License-Apache%202.0-green" alt="License">
+</p>
+
+---
+
+We introduce an efficient, resolution-agnostic autoregressive (AR) image synthesis approach that generalizes to **arbitrary resolutions and aspect ratios**, narrowing the gap to diffusion models at scale. At its core is **VibeToken**, a novel resolution-agnostic 1D Transformer-based image tokenizer that encodes images into a dynamic, user-controllable sequence of 32--256 tokens, achieving state-of-the-art efficiency and performance trade-off. Building on VibeToken, we present **VibeToken-Gen**, a class-conditioned AR generator with out-of-the-box support for arbitrary resolutions while requiring significantly fewer compute resources.
+
+### 🔥 Highlights
+
+| | |
+|---|---|
+| 🎯 **1024×1024 in just 64 tokens** | Achieves **3.94 gFID** vs. 5.87 gFID for diffusion-based SOTA (1,024 tokens) |
+| ⚡ **Constant 179G FLOPs** | 63× more efficient than LlamaGen (11T FLOPs at 1024×1024) |
+| 🌐 **Resolution-agnostic** | Supports arbitrary resolutions and aspect ratios out of the box |
+| 🎛️ **Dynamic token count** | User-controllable 32--256 tokens per image |
 
 
-## Releases
+## 📰 News
 
-- [x] Inference Code
-- [x] Checkpoint Release
-- [ ] Training Scripts
-
-
-## Checkpoints
+- **[Feb 2026]** 🎉 VibeToken is accepted at **CVPR 2026**!
+- **[Feb 2026]** Training scripts released.
+- **[Feb 2026]** Inference code and checkpoints released.
 
 
-### VibeToken Reconstruction Checkpoints
+## 🚀 Quick Start
 
-All checkpoints are avaiable on S3. Please refer to the following S3 access keys.
+```bash
+# 1. Clone and setup
+git clone https://github.com/<your-org>/VibeToken.git
+cd VibeToken
+uv venv --python=3.11.6
+source .venv/bin/activate
+uv pip install -r requirements.txt
+
+# 2. Download a checkpoint (see Checkpoints section below)
+pip install awscli
+export AWS_ACCESS_KEY_ID=AKIATXRXFEIWPN2VLGUE
+export AWS_SECRET_ACCESS_KEY=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
+mkdir -p checkpoints
+aws s3 cp s3://vibetoken/checkpoints/VibeToken_LL.bin ./checkpoints/
+
+# 3. Reconstruct an image
+python reconstruct.py --auto \
+  --config configs/vibetoken_ll.yaml \
+  --checkpoint ./checkpoints/VibeToken_LL.bin \
+  --image ./assets/example_1.png \
+  --output ./assets/reconstructed.png
+```
+
+
+## 📦 Checkpoints
+
+All checkpoints are available on S3. Set up access as follows:
 
 ```bash
 pip install awscli
@@ -28,69 +74,72 @@ pip install awscli
 export AWS_ACCESS_KEY_ID=AKIATXRXFEIWPN2VLGUE
 export AWS_SECRET_ACCESS_KEY=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
 
-aws s3 cp <s3-path> <output-path>
+mkdir -p checkpoints
+aws s3 cp <s3-path> ./checkpoints/
 ```
 
-| Name                   | Resolution | rFID (256 tokens) | rFID (64 tokens) | Download Link                                           |
-|------------------------|:---------------------:|:-----------------:|:----------------:|---------------------------------------------------------|
-| VibeToken-LL      | 1024x1024                 | 3.76              | 4.12             | s3://vibetoken/checkpoints/VibeToken_LL.bin |
-| VibeToken-LL      | 256x256                   | 5.12              | 0.90             | s3://vibetoken/checkpoints/VibeToken_LL.bin (same as above) |
-| VibeToken-SL      | 1024x1024                 | 4.25              | 2.41             | s3://vibetoken/checkpoints/VibeToken_SL.bin |
-| VibeToken-SL      | 256x256                   | 5.44              | 0.40             | s3://vibetoken/checkpoints/VibeToken_SL.bin (same as above) |
+#### Reconstruction Checkpoints
+
+| Name | Resolution | rFID (256 tokens) | rFID (64 tokens) | Download |
+|------|:----------:|:-----------------:|:----------------:|----------|
+| VibeToken-LL | 1024×1024 | 3.76 | 4.12 | `s3://vibetoken/checkpoints/VibeToken_LL.bin` |
+| VibeToken-LL | 256×256 | 5.12 | 0.90 | same as above |
+| VibeToken-SL | 1024×1024 | 4.25 | 2.41 | `s3://vibetoken/checkpoints/VibeToken_SL.bin` |
+| VibeToken-SL | 256×256 | 5.44 | 0.40 | same as above |
+
+#### Generation Checkpoints
+
+| Name | Training Resolution(s) | Tokens | Best gFID | Download |
+|------|:----------------------:|:------:|:---------:|----------|
+| VibeToken-Gen-B | 256×256 | 65 | 7.62 | `s3://vibetoken/checkpoints/VibeTokenGen-b-fixed65_dynamic_1500k.pt` |
+| VibeToken-Gen-B | 1024×1024 | 65 | 7.37 | same as above |
+| VibeToken-Gen-XXL | 256×256 | 65 | 3.62 | `s3://vibetoken/checkpoints/VibeTokenGen-xxl-dynamic-65_750k.pt` |
+| VibeToken-Gen-XXL | 1024×1024 | 65 | **3.54** | same as above |
 
 
-### VibeToken-Gen Generation Checkpoints
-
-| Name                        | Training Resolution(s) | Tokens    | Best gFID | Download Link                                           |
-|-----------------------------|:---------------------:|:-------------:|:---------:|---------------------------------------------------------|
-| VibeToken-Gen-B         | 256x256               | 65            | 7.62      | s3://vibetoken/checkpoints/VibeTokenGen-b-fixed65_dynamic_1500k.pt      |
-| VibeToken-Gen-B         | 1024x1024             | 65            | 7.37      | s3://vibetoken/checkpoints/VibeTokenGen-b-fixed65_dynamic_1500k.pt   (same as above)   |
-| VibeToken-Gen-XXL       | 256x256               | 65            | 3.62      | s3://vibetoken/checkpoints/VibeTokenGen-xxl-dynamic-65_750k.pt  |
-| VibeToken-Gen-XXL       | 1024x1024             | 65            | 3.54      | s3://vibetoken/checkpoints/VibeTokenGen-xxl-dynamic-65_750k.pt (same as above) |
-
-
-## Setup
+## 🛠️ Setup
 
 ```bash
 uv venv --python=3.11.6
 source .venv/bin/activate
-uv pip install -r requirements.txt # this is not maintained
+uv pip install -r requirements.txt
 ```
 
+> **Tip:** If you don't have `uv`, install it via `pip install uv` or see [uv docs](https://github.com/astral-sh/uv). Alternatively, use `python -m venv .venv && pip install -r requirements.txt`.
 
-## VibeToken Reconstruction
 
-- Download the VibeToken-LL
+## 🖼️ VibeToken Reconstruction
 
-```python
-# select auto for our suggested adaptation to arbitrary resolution
-python reconstruct.py     \
-  --config configs/vibetoken_ll.yaml     \
-  --checkpoint /mnt/localssd/vibetoken_mvq_ll.bin     \
-  --image ./assets/example_1.png     \
-  --output assets/reconstructed.png \
-  --auto
+Download the VibeToken-LL checkpoint (see [Checkpoints](#-checkpoints)), then:
 
-# or manually define the parameters
-python reconstruct.py     \
-  --config configs/vibetoken_ll.yaml     \
-  --checkpoint /mnt/localssd/vibetoken_mvq_ll.bin     \
-  --image ./assets/example_1.png     \
-  --output assets/reconstructed.png \
+```bash
+# Auto mode (recommended) -- automatically determines optimal patch sizes
+python reconstruct.py --auto \
+  --config configs/vibetoken_ll.yaml \
+  --checkpoint ./checkpoints/VibeToken_LL.bin \
+  --image ./assets/example_1.png \
+  --output ./assets/reconstructed.png
+
+# Manual mode -- specify patch sizes explicitly
+python reconstruct.py \
+  --config configs/vibetoken_ll.yaml \
+  --checkpoint ./checkpoints/VibeToken_LL.bin \
+  --image ./assets/example_1.png \
+  --output ./assets/reconstructed.png \
   --encoder_patch_size 16 \
   --decoder_patch_size 16
 ```
-Note: We require the input image resolution to be the factor of 32 for the best performance. Hence, for any other rnadom resolutions, we reslace the image to nearest multiple of 32.
 
-## VibeToken-Gen ImageNet1k Generations
+> **Note:** For best performance, the input image resolution should be a multiple of 32. Images with other resolutions are automatically rescaled to the nearest multiple of 32.
 
-- Download the VibeToken-LL
-- Download the VibeToken-Gen-XXL
 
+## 🎨 VibeToken-Gen: ImageNet-1k Generation
+
+Download both the VibeToken-LL and VibeToken-Gen-XXL checkpoints (see [Checkpoints](#-checkpoints)), then:
 
 ```bash
 python generate.py \
-    --gpt-ckpt /mnt/localssd/vibetoken/gpt-xxl-dynamic-65_750k.pt \
+    --gpt-ckpt ./checkpoints/VibeTokenGen-xxl-dynamic-65_750k.pt \
     --gpt-model GPT-XXL --num-output-layer 4 \
     --num-codebooks 8 --codebook-size 32768 \
     --image-size 256 --cfg-scale 4.0 --top-k 500 --temperature 1.0 \
@@ -98,24 +147,44 @@ python generate.py \
     --extra-layers "QKV" \
     --latent-size 65 \
     --config ./configs/vibetoken_ll.yaml \
-    --vq-ckpt /mnt/localssd/vibetoken/MVQ_LL_590k.bin \
+    --vq-ckpt ./checkpoints/VibeToken_LL.bin \
     --sample-dir ./assets/ \
     --skip-folder-creation \
     --compile \
     --decoder-patch-size 32,32 \
-    --target-resolution 1024,1024 \ # this is for tokenizer
-    --llamagen-target-resolution 256,256 \ # this is for the generator (maximum is 512,512 for higher resolution handle this via tokenizer)
+    --target-resolution 1024,1024 \
+    --llamagen-target-resolution 256,256 \
     --precision bf16 \
-    --skip-folder-creation \
     --global-seed 156464151
 ```
 
-## Train
+The `--target-resolution` controls the tokenizer output resolution, while `--llamagen-target-resolution` controls the generator's internal resolution (max 512×512; for higher resolutions, the tokenizer handles upscaling).
 
-To train the model, please refer to the [TRAIN.md](TRAIN.md) script for detailed instructions.
 
-## Acknowledgement
+## 🏋️ Training
 
-We would like to acknowledge the following repository which inspired our works and directly builds upon their source code: 1d-tokenizer, LLamaGen, and UniTok.
+To train the VibeToken tokenizer from scratch, please refer to [TRAIN.md](TRAIN.md) for detailed instructions.
 
-## Citation
+
+## 🙏 Acknowledgement
+
+We would like to acknowledge the following repositories that inspired our work and upon which we directly build:
+[1d-tokenizer](https://github.com/bytedance/1d-tokenizer),
+[LlamaGen](https://github.com/FoundationVision/LlamaGen), and
+[UniTok](https://github.com/FoundationVision/UniTok).
+
+
+## 📝 Citation
+
+If you find VibeToken useful in your research, please consider citing:
+
+```bibtex
+@inproceedings{vibetoken2026,
+  title     = {VibeToken: Scaling 1D Image Tokenizers and Autoregressive Models for Dynamic Resolution Generations},
+  author    = {TODO},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2026}
+}
+```
+
+If you have any questions, feel free to open an issue or reach out!
