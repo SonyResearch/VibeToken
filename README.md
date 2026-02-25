@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/CVPR-2026-blue" alt="CVPR 2026">
   <img src="https://img.shields.io/badge/arXiv-TODO-b31b1b" alt="arXiv">
   <img src="https://img.shields.io/badge/License-Apache%202.0-green" alt="License">
+  <a href="https://huggingface.co/mpatel57/VibeToken"><img src="https://img.shields.io/badge/🤗-Model-yellow" alt="HuggingFace"></a>
 </p>
 
 ---
@@ -29,6 +30,7 @@ We introduce an efficient, resolution-agnostic autoregressive (AR) image synthes
 | ⚡ **Constant 179G FLOPs** | 63× more efficient than LlamaGen (11T FLOPs at 1024×1024) |
 | 🌐 **Resolution-agnostic** | Supports arbitrary resolutions and aspect ratios out of the box |
 | 🎛️ **Dynamic token count** | User-controllable 32--256 tokens per image |
+| 🔍 **Native super-resolution** | Supports image super-resolution out of the box |
 
 
 ## 📰 News
@@ -49,11 +51,8 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 
 # 2. Download a checkpoint (see Checkpoints section below)
-pip install awscli
-export AWS_ACCESS_KEY_ID=AKIATXRXFEIWPN2VLGUE
-export AWS_SECRET_ACCESS_KEY=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
 mkdir -p checkpoints
-aws s3 cp s3://vibetoken/checkpoints/VibeToken_LL.bin ./checkpoints/
+wget https://huggingface.co/mpatel57/VibeToken/resolve/main/VibeToken_LL.bin -O ./checkpoints/VibeToken_LL.bin
 
 # 3. Reconstruct an image
 python reconstruct.py --auto \
@@ -66,34 +65,24 @@ python reconstruct.py --auto \
 
 ## 📦 Checkpoints
 
-All checkpoints are available on S3. Set up access as follows:
-
-```bash
-pip install awscli
-
-export AWS_ACCESS_KEY_ID=AKIATXRXFEIWPN2VLGUE
-export AWS_SECRET_ACCESS_KEY=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
-
-mkdir -p checkpoints
-aws s3 cp <s3-path> ./checkpoints/
-```
+All checkpoints are hosted on [Hugging Face](https://huggingface.co/mpatel57/VibeToken).
 
 #### Reconstruction Checkpoints
 
 | Name | Resolution | rFID (256 tokens) | rFID (64 tokens) | Download |
 |------|:----------:|:-----------------:|:----------------:|----------|
-| VibeToken-LL | 1024×1024 | 3.76 | 4.12 | `s3://vibetoken/checkpoints/VibeToken_LL.bin` |
+| VibeToken-LL | 1024×1024 | 3.76 | 4.12 | [VibeToken_LL.bin](https://huggingface.co/mpatel57/VibeToken/resolve/main/VibeToken_LL.bin) |
 | VibeToken-LL | 256×256 | 5.12 | 0.90 | same as above |
-| VibeToken-SL | 1024×1024 | 4.25 | 2.41 | `s3://vibetoken/checkpoints/VibeToken_SL.bin` |
+| VibeToken-SL | 1024×1024 | 4.25 | 2.41 | [VibeToken_SL.bin](https://huggingface.co/mpatel57/VibeToken/resolve/main/VibeToken_SL.bin) |
 | VibeToken-SL | 256×256 | 5.44 | 0.40 | same as above |
 
 #### Generation Checkpoints
 
 | Name | Training Resolution(s) | Tokens | Best gFID | Download |
 |------|:----------------------:|:------:|:---------:|----------|
-| VibeToken-Gen-B | 256×256 | 65 | 7.62 | `s3://vibetoken/checkpoints/VibeTokenGen-b-fixed65_dynamic_1500k.pt` |
+| VibeToken-Gen-B | 256×256 | 65 | 7.62 | [VibeTokenGen-b-fixed65_dynamic_1500k.pt](https://huggingface.co/mpatel57/VibeToken/resolve/main/VibeTokenGen-b-fixed65_dynamic_1500k.pt) |
 | VibeToken-Gen-B | 1024×1024 | 65 | 7.37 | same as above |
-| VibeToken-Gen-XXL | 256×256 | 65 | 3.62 | `s3://vibetoken/checkpoints/VibeTokenGen-xxl-dynamic-65_750k.pt` |
+| VibeToken-Gen-XXL | 256×256 | 65 | 3.62 | [VibeTokenGen-xxl-dynamic-65_750k.pt](https://huggingface.co/mpatel57/VibeToken/resolve/main/VibeTokenGen-xxl-dynamic-65_750k.pt) |
 | VibeToken-Gen-XXL | 1024×1024 | 65 | **3.54** | same as above |
 
 
@@ -181,7 +170,7 @@ If you find VibeToken useful in your research, please consider citing:
 ```bibtex
 @inproceedings{vibetoken2026,
   title     = {VibeToken: Scaling 1D Image Tokenizers and Autoregressive Models for Dynamic Resolution Generations},
-  author    = {TODO},
+  author    = {Patel, Maitreya and Li, Jingtao and Zhuang, Weiming and Yang, Yezhou and Lyu, Lingjuan},
   booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
   year      = {2026}
 }
