@@ -1,4 +1,4 @@
-# VibeToken: Scaling 1D Image Tokenizers and Autoregressive Models for Dynamic Resolution Generations
+# [CVPR 2026] VibeToken: Scaling 1D Image Tokenizers and Autoregressive Models for Dynamic Resolution Generations
 
 <p align="center">
   <img src="assets/teaser.png" alt="VibeToken Teaser" width="100%">
