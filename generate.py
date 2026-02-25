@@ -3,7 +3,7 @@
 
 """Example run:
 python generate.py \
-    --gpt-ckpt /mnt/localssd/vibetoken/gpt-xxl-dynamic-65_750k.pt \
+    --gpt-ckpt ./checkpoints/VibeTokenGen-xxl-dynamic-65_750k.pt \
     --gpt-model GPT-XXL --num-output-layer 4 \
     --num-codebooks 8 --codebook-size 32768 \
     --image-size 256 --cfg-scale 2.0 --top-k 0 --temperature 1.0 \
@@ -11,15 +11,14 @@ python generate.py \
     --extra-layers "QKV" \
     --latent-size 65 \
     --config ./configs/vibetoken_ll.yaml \
-    --vq-ckpt /mnt/localssd/vibetoken/MVQ_LL_590k.bin \
+    --vq-ckpt ./checkpoints/VibeToken_LL.bin \
     --sample-dir ./assets/ \
     --skip-folder-creation \
     --compile \
-    --decoder-patch-size 16,16
-    --target-resolution 1024,1024 # this is for tokenizer
-    --llamagen-target-resolution 256,256 # this is for the generator (maximum is 512,512 for higher resolution handle this via tokenizer)
-    --precision bf16 \
-    --skip-folder-creation
+    --decoder-patch-size 16,16 \
+    --target-resolution 1024,1024 \
+    --llamagen-target-resolution 256,256 \
+    --precision bf16
 """
 
 import torch
@@ -79,14 +78,14 @@ def main(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     precision = {'none': torch.float32, 'bf16': torch.bfloat16, 'fp16': torch.float16}[args.precision]
 
-    # Load TokenVibe model
+    # Load VibeToken model
     vq_model = VibeTokenTokenizer.from_config(
         args.config,
         args.vq_ckpt,
         device=device,
         dtype=precision,
     )
-    print(f"TokenVibe image tokenizer is loaded")
+    print(f"VibeToken image tokenizer is loaded")
 
     # create and load gpt model
     gpt_model = GPT_models[args.gpt_model](
@@ -138,7 +137,7 @@ def main(args):
         ckpt_string_name = args.gpt_ckpt.split('/')[-2]
     else:
         ckpt_string_name = os.path.basename(args.gpt_ckpt).replace(".pth", "").replace(".pt", "")
-    folder_name = f"{model_string_name}-{ckpt_string_name}-target-resolution-{args.target_resolution}-llamagen-target-resolution-{args.llamagen_target_resolution}-tokenvibe-" \
+    folder_name = f"{model_string_name}-{ckpt_string_name}-target-resolution-{args.target_resolution}-llamagen-target-resolution-{args.llamagen_target_resolution}-vibetoken-" \
                   f"topk-{args.top_k}-topp-{args.top_p}-temperature-{args.temperature}-" \
                   f"cfg-{args.cfg_scale}-seed-{args.global_seed}"
     if args.skip_folder_creation:
@@ -166,8 +165,8 @@ def main(args):
         top_p=args.top_p, sample_logits=True,
     )
 
-    # Use TokenVibe decode_tokens method
-    # TokenVibe expects tokens in shape (batch_size, seq_len, 1)
+    # Use VibeToken decode_tokens method
+    # VibeToken expects tokens in shape (batch_size, seq_len, 1)
     index_sample = index_sample.unsqueeze(2)
     samples = vq_model.decode(
         index_sample, 
@@ -176,7 +175,7 @@ def main(args):
         patch_size=args.decoder_patch_size
     )
     
-    # TokenVibe output is in [0, 1] range, clamp and convert to uint8
+    # VibeToken output is in [0, 1] range, clamp and convert to uint8
     samples = torch.clamp(samples, 0, 1)
 
     # Create a grid of images (2 rows x 4 columns)
@@ -201,7 +200,7 @@ if __name__ == "__main__":
     parser.add_argument("--compile", action='store_true', default=True)
     # parser.add_argument("--vq-model", type=str, choices=list(VQ_models.keys()), default="VQ-16")
     parser.add_argument("--vq-ckpt", type=str, default=None, help="ckpt path for vq model")
-    parser.add_argument("--config", type=str, required=True, help="Path to TokenVibe config file")
+    parser.add_argument("--config", type=str, required=True, help="Path to VibeToken config file")
     parser.add_argument("--codebook-size", type=int, default=16384, help="codebook size for vector quantization")
     parser.add_argument("--codebook-embed-dim", type=int, default=8, help="codebook dimension for vector quantization")
     parser.add_argument("--image-size", type=int, choices=[256, 384, 512], default=384)
@@ -224,7 +223,7 @@ if __name__ == "__main__":
                         help="Type of extra layers to add: QK (query-key), QKV (query-key-value), FC (fully connected), cap (caption), clip (clip), QK_cap (query-key-caption), QKV_cap (query-key-value-caption), QK_clip (query-key-clip), QKV_clip (query-key-value-clip), QK_FC_cap (query-key-fully-connected-caption), QKV_FC_cap (query-key-value-fully-connected-caption), QK_FC_clip (query-key-fully-connected-clip), QKV_FC_clip (query-key-value-fully-connected-clip)")
     parser.add_argument("--capping", type=float, default=50.0, help="Capping for attention softmax")
 
-    # TokenVibe dynamic
+    # VibeToken dynamic
     parser.add_argument("--decoder-patch-size", type=str, default="8,8", help="Decoder patch size as 'width,height'")
     parser.add_argument("--target-resolution", type=str, default="256,256", help="Target resolution as 'width,height'")
     parser.add_argument("--llamagen-target-resolution", type=str, default="256,256", help="LlamaGen target resolution as 'width,height'")

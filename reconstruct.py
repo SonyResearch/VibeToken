@@ -39,7 +39,7 @@ def main():
     parser = argparse.ArgumentParser(description="VibeToken image reconstruction")
     parser.add_argument("--config", type=str, default="configs/vibetoken_ll.yaml",
                         help="Path to config YAML")
-    parser.add_argument("--checkpoint", type=str, default="/mnt/localssd/vibetoken_mvq_ll.bin",
+    parser.add_argument("--checkpoint", type=str, required=True,
                         help="Path to model checkpoint")
     parser.add_argument("--image", type=str, default="assets/example_1.jpg",
                         help="Path to input image")

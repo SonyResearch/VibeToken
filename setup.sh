@@ -1,2 +1,20 @@
-aws s3 cp s3://maitreyap/summer25/VibeToken_ckpts/tokenizer_ckpts/MVQ_LL_590k/ckpt-590k/ema_model/pytorch_model.bin /mnt/localssd/vibetoken/MVQ_LL_590k.bin
-aws s3 cp s3://maitreyap/summer25/VibeToken_ckpts/generator_ckpts/main_chkpts/main_xxls/gpt-xxl-dynamic-65_750k.pt /mnt/localssd/vibetoken/gpt-xxl-dynamic-65_750k.pt
+#!/bin/bash
+# Data preparation script for VibeToken training.
+# Set DATA_DIR to control where datasets are stored (defaults to ./data).
+#
+# Usage:
+#   export DATA_DIR=/mnt/fastssd/datasets   # optional, defaults to ./data
+#   bash setup.sh
+
+DATA_DIR="${DATA_DIR:-./data}"
+
+echo "Using DATA_DIR=${DATA_DIR}"
+
+# Download ImageNet-1k via HuggingFace
+export HF_HUB_ENABLE_HF_TRANSFER=1
+huggingface-cli download ILSVRC/imagenet-1k --repo-type dataset --local-dir "${DATA_DIR}/imagenet-1k"
+
+# Convert to WebDataset format
+python data/convert_imagenet_to_wds.py \
+    --input_dir "${DATA_DIR}/imagenet-1k" \
+    --output_dir "${DATA_DIR}/imagenet_wds"
