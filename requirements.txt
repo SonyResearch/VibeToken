@@ -22,3 +22,4 @@ gdown
 tqdm
 requests
 datasets
+gradio>=4.0.0
