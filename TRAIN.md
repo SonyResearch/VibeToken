@@ -103,8 +103,8 @@ model:
 ```
 
 
-### Reproduced Results on Small Baseline
+<!-- ### Reproduced Results on Small Baseline
 
 > Note: Our released checkpoints are from a different codebase and may observe +/- changes in results.
 
-Below we report the performance on the above training script on the small baseline. This baseline is not reported in the paper but achieves competitive performance as expected.
+Below we report the performance on the above training script on the small baseline. This baseline is not reported in the paper but achieves competitive performance as expected. -->
