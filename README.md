@@ -14,7 +14,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/CVPR-2026-blue" alt="CVPR 2026">
   <img src="https://img.shields.io/badge/arXiv-TODO-b31b1b" alt="arXiv">
-  <img src="https://img.shields.io/badge/License-Apache%202.0-green" alt="License">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
   <a href="https://huggingface.co/mpatel57/VibeToken"><img src="https://img.shields.io/badge/🤗-Model-yellow" alt="HuggingFace"></a>
 </p>
 
